@@ -13,7 +13,7 @@ st.set_page_config(page_title="SPSS Mini - Kanker Mulut Daun Afrika", layout="wi
 # =========================================================================
 # 🔒 SISTEM PENGAMAN / PASSWORD LOGIN
 # =========================================================================
-PASSWORD_BENAR = "RahasiaSkripsi2026" 
+PASSWORD_BENAR = "N4yl@0908" 
 
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
