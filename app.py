@@ -135,7 +135,7 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
 
     st.header("📈 3. Dokumen Output Hasil Statistik & Grafik (Siap Salin ke Word)")
     
-    html_word_exporter = "<html><head><meta charset='utf-8'></head><body><h2 style='font-family:sans-serif;'>LAPORAN OUTPUT ANALISIS STATISTIK SKRIPSI</h2>"
+    html_word_exporter = "<html><head><meta charset='utf-8'></head><body style='font-family:sans-serif; padding:20px;'><h2>LAPORAN OUTPUT ANALISIS STATISTIK SKRIPSI KEDOKTERAN GIGI</h2><hr>"
 
     data_p1 = edited_df[nama_kelompok[0]].tolist()
     data_p2 = edited_df[nama_kelompok[1]].tolist()
@@ -161,7 +161,7 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
         
     df_visual_jurnal = pd.DataFrame(rows_deskriptif)
     tabel1_html = render_tabel_jurnal(df_visual_jurnal, "Tabel 4.8 Gambaran Histologi Tingkat Displasia Mukosa Mulut Tikus (N=27)")
-    html_word_exporter += "<h3>1. Analisis Deskriptif Jurnal Ilmiah</h3>" + tabel1_html
+    html_word_exporter += "<h3>1. Analisis Deskriptif Jurnal Ilmiah (Tabel 4.8)</h3>" + tabel1_html
 
     # =========================================================================
     # TAHAP 2 & 3: UJI PREPARASI ASUMSI STATISTIK (GAYA DESAIN ASLI SPSS KUNING)
@@ -221,7 +221,6 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
             })
             tabel5_html = render_tabel_spss(df_mw_single, f"Mann-Whitney Test: Perbandingan {label}")
             html_word_exporter += f"<h4>Komparasi Pasangan {label}</h4>" + tabel5_html
-
     # =========================================================================
     # GRAFIK VISUALISASI JURNAL
     # =========================================================================
@@ -269,19 +268,21 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     Karena anak Bapak melakukan perbandingan berulang sebanyak 3 kali (P1 vs P2, P2 vs P3, P1 vs P3) pada satu sampel yang sama, akan muncul risiko kesalahan tipe I (galat semu). Oleh karena itu, batas keadilan ilmiah tidak lagi memakai alpha = 0.05, melainkan diturunkan lewat Koreksi Alpha Bonferroni menjadi 0.0167 (0.05 dibagi 3 perbandingan). Dokumen tabel di atas telah dikunci menggunakan batas kritis 0.0167 ini untuk menjamin orisinalitas metodologi riset skripsi anak Bapak bebas dari penolakan dosen penguji.
     """
     st.markdown(teks_rumus, unsafe_allow_html=True)
-    html_word_exporter += f"<h3>6. Lampiran Landasan Teori Rumus Matematika</h3>{teks_rumus}</body></html>"
+    html_word_exporter += f"<hr><h3>6. Lampiran Landasan Teori Rumus Matematika</h3>{teks_rumus}</body></html>"
 
     # =========================================================================
-    # 🔥 TOMBOL UNDUH MICROSOFT WORD (.DOCX) OTOMATIS DI PALING BAWAH
+    # 🔥 TOMBOL UNDUH LAPORAN TERFORMAT (.HTML) DI PALING BAWAH HALAMAN
     # =========================================================================
     st.markdown("---")
     st.subheader("📥 4. Cetak Lampiran Hasil Skripsi Otomatis")
-    
-    bytes_word_file = io.BytesIO(html_word_exporter.encode('utf-8'))
+    st.info("Klik tombol di bawah ini untuk mengunduh dokumen laporan hasil, buka file yang terunduh, lalu copy-paste (Ctrl+A -> Ctrl+C -> Ctrl+V) seluruh isinya ke Microsoft Word.")
+
+    bytes_html_file = io.BytesIO(html_word_exporter.encode('utf-8'))
     st.download_button(
-        label="📥 DOWNLOAD HASIL ANALISIS DALAM BENTUK WORD (.DOCX)",
-        data=bytes_word_file,
-        file_name="Lampiran_Output_SPSS_Skripsi.docx",
-        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        label="📥 DOWNLOAD DOKUMEN HASIL UNTUK MICROSOFT WORD (.HTML)",
+        data=bytes_html_file,
+        file_name="Lampiran_Output_SPSS_Skripsi.html",
+        mime="text/html",
         type="primary"
     )
+
