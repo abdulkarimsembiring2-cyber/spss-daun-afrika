@@ -52,7 +52,7 @@ def render_tabel_spss(df, judul_spss=""):
 # =========================================================================
 # 🔒 SISTEM PENGAMAN / PASSWORD LOGIN
 # =========================================================================
-PASSWORD_BENAR = "XXXXXXX" 
+PASSWORD_BENAR = "N4yl@0908" 
 
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
