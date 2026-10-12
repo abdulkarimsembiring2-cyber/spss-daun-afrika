@@ -265,7 +265,7 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     Ketika Kruskal-Wallis menyatakan ada perbedaan, kita harus melacak pasangan mana yang berbeda menggunakan Uji Mann-Whitney U. Konsep dasarnya adalah menghitung frekuensi kemenangan peringkat antara dua kelompok yang diadu.<br><br>
     
     <b>⚠️ Pengaman Krusial Jurnal Medis (Koreksi Bonferroni):</b><br>
-    Karena anak Bapak melakukan perbandingan berulang sebanyak 3 kali (P1 vs P2, P2 vs P3, P1 vs P3) pada satu sampel yang sama, akan muncul risiko kesalahan tipe I (galat semu). Oleh karena itu, batas keadilan ilmiah tidak lagi memakai alpha = 0.05, melainkan diturunkan lewat Koreksi Alpha Bonferroni menjadi 0.0167 (0.05 dibagi 3 perbandingan). Dokumen tabel di atas telah dikunci menggunakan batas kritis 0.0167 ini untuk menjamin orisinalitas metodologi riset skripsi anak Bapak bebas dari penolakan dosen penguji.
+    Karena data melakukan perbandingan berulang sebanyak 3 kali (P1 vs P2, P2 vs P3, P1 vs P3) pada satu sampel yang sama, akan muncul risiko kesalahan tipe I (galat semu). Oleh karena itu, batas keadilan ilmiah tidak lagi memakai alpha = 0.05, melainkan diturunkan lewat Koreksi Alpha Bonferroni menjadi 0.0167 (0.05 dibagi 3 perbandingan). Dokumen tabel di atas telah dikunci menggunakan batas kritis 0.0167 ini untuk menjamin orisinalitas metodologi riset skripsi anak Bapak bebas dari penolakan dosen penguji.
     """
     st.markdown(teks_rumus, unsafe_allow_html=True)
     html_word_exporter += f"<hr><h3>6. Lampiran Landasan Teori Rumus Matematika</h3>{teks_rumus}</body></html>"
