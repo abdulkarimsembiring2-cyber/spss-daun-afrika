@@ -126,7 +126,7 @@ st.download_button(
 )
 
 st.markdown("---")
-# 🚀 PROSES STATISTIK LENGKAP (5 TAHAP ANALISIS DENGAN FORMAT FORMAT LAPORAN DOKUMEN)
+# 🚀 PROSES STATISTIK LENGKAP (5 TAHAP ANALISIS DENGAN FORMAT LAPORAN DOKUMEN)
 if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="primary"):
     
     if not edited_df.isin([0, 1, 2, 3]).all().all():
@@ -208,7 +208,7 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     })
     render_tabel_spss(df_kw_spss, "Npar Tests: Kruskal-Wallis Test (Test Statistics)")
     
-    # 5. Mann-Whitney U Test (Uji Lanjut Pasangan Berpasangan)
+    # 5. Mann-Whitney U Test (Uji Lanjut Perbandingan Berpasangan)
     if p_kw < 0.05:
         st.success("🟢 Hasil Kruskal-Wallis Bermakna Nyata (p < 0.05). Sistem otomatis menampilkan Uji Lanjut Mann-Whitney U di bawah ini:")
         
@@ -255,7 +255,7 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     
     st.markdown("""
     ### 1. Landasan Hukum Transisi Uji (Mengapa Menggunakan Non-Parametrik?)
-    Skala pengukuran variabel penelitian anak Bapak adalah **Kategorik Ordinal** (Tingkatan derajat displasia: 0, 1, 2, 3). Data ordinal tidak memiliki sifat interval kuantitatif yang konstan (selisih klinis antara Normal ke Ringan tidak bisa disamakan dengan Sedang ke Berat). 
+    Skala pengukuran variabel penelitian anak Bapak adalah **Kategorik Ordinal** (Tingkatan derajat displasia: 0, 1, 2, 3). Data ordinal tidak memiliki sifat interval kuantitatif yang konstan.
     
     Berdasarkan pengujian **Shapiro-Wilk**, rumus mencari nilai statistik $W$ adalah:
     $$ W = \\frac{(\\sum_{i=1}^n a_i x_{(i)})^2}{\\sum_{i=1}^n (x_i - \\bar{x})^2} $$
@@ -288,3 +288,4 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     **⚠️ Pengaman Krusial Jurnal Medis (Koreksi Bonferroni):**
     Karena anak Bapak melakukan perbandingan berulang sebanyak 3 kali (P1 vs P2, P2 vs P3, P1 vs P3) pada satu sampel yang sama, akan muncul risiko kesalahan tipe I (*galat semu*). Oleh karena itu, batas keadilan ilmiah tidak lagi memakai $\\alpha = 0.05$, melainkan diturunkan lewat **Koreksi Alpha Bonferroni**:
     $$ \\alpha_{baru} = \\frac{\\alpha_{awal}}{m} = \\frac{0.05}{3} = 0.0167 $$
+
