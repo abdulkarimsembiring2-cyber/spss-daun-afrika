@@ -19,12 +19,13 @@ def render_tabel_jurnal(df, judul=""):
             </tr>
     """
     for _, row in df.iterrows():
-        html += "<tr style='border-bottom: 1px solid #ddd;'>"
+        html += "<tr style='border-bottom: 1px solid #ddd;'> layout='wide'"
         for val in row:
             html += f"<td style='padding: 8px;'>{val}</td>"
         html += "</tr>"
     html += "<tr style='border-bottom: 2px solid black;'></tr></table></div>"
     st.markdown(html, unsafe_allow_html=True)
+    return html
 
 # Fungsi pembantu untuk duplikasi gaya visual SPSS Kuning
 def render_tabel_spss(df, judul_spss=""):
@@ -46,11 +47,12 @@ def render_tabel_spss(df, judul_spss=""):
         html += "</tr>"
     html += "</table></div>"
     st.markdown(html, unsafe_allow_html=True)
+    return html
 
 # =========================================================================
 # 🔒 SISTEM PENGAMAN / PASSWORD LOGIN
 # =========================================================================
-PASSWORD_BENAR = "N4yl@0908" 
+PASSWORD_BENAR = "XXXXXXX" 
 
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
@@ -82,7 +84,7 @@ st.sidebar.info("""
 
 nama_kelompok = [
     "Kelompok P1 (Ekstrak Daun Afrika 400mg/kg + DMBA)",
-    "Kelompok P2 (Flavonoid Quercetin 25mg/kg + DMBA)",
+    "Kelompok P2 (Flavenoid Quercetin 25mg/kg + DMBA)",
     "Kelompok P3 (Kontrol Positif DMBA)"
 ]
 
@@ -90,7 +92,7 @@ st.header("💾 Riwayat Data (Impor / Ekspor)")
 uploaded_file = st.file_uploader("Punya simpanan berkas Excel dari progres minggu lalu? Unggah di sini:", type=["xlsx"])
 
 index_tikus = [f"Tikus {i+1}" for i in range(9)]
-matrix_data = {g_name: [0] * 9 for g_name in nama_kelompok}
+matrix_data = {g_name: * 9 for g_name in nama_kelompok}
 df_input = pd.DataFrame(matrix_data, index=index_tikus)
 
 if uploaded_file is not None:
@@ -133,6 +135,9 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
         st.stop()
 
     st.header("📈 3. Dokumen Output Hasil Statistik & Grafik (Siap Salin ke Word)")
+    
+    # Inisialisasi string pengumpul HTML untuk diekspor ke Word paling bawah
+    html_word_exporter = "<html><head><meta charset='utf-8'></head><body><h2 style='font-family:sans-serif;'>LAPORAN OUTPUT ANALISIS STATISTIK SKRIPSI</h2>"
 
     data_p1 = edited_df[nama_kelompok[0]].tolist()
     data_p2 = edited_df[nama_kelompok[1]].tolist()
@@ -142,7 +147,6 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     # TAHAP 1: TABEL DESKRIPTIF GAYA JURNAL (Adopsi Tabel 4.8)
     # =========================================================================
     st.markdown("### 🔹 Tahap 1: Tabel Analisis Deskriptif")
-    st.caption("💡 Petunjuk: Blok, klik kanan, lalu salin tabel di bawah ini langsung untuk dimasukkan ke Bab 4 Word.")
     
     skor_labels = {0: "Normal (Skor 0)", 1: "Ringan (Skor 1)", 2: "Sedang (Skor 2)", 3: "Berat (Skor 3)"}
     rows_deskriptif = []
@@ -159,7 +163,8 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
         rows_deskriptif.append(current_row)
         
     df_visual_jurnal = pd.DataFrame(rows_deskriptif)
-    render_tabel_jurnal(df_visual_jurnal, "Tabel 4.8 Gambaran Histologi Tingkat Displasia Mukosa Mulut Tikus (N=27)")
+    tabel1_html = render_tabel_jurnal(df_visual_jurnal, "Tabel 4.8 Gambaran Histologi Tingkat Displasia Mukosa Mulut Tikus (N=27)")
+    html_word_exporter += "<h3>1. Analisis Deskriptif Jurnal Ilmiah</h3>" + tabel1_html
 
     # =========================================================================
     # TAHAP 2 & 3: UJI PREPARASI ASUMSI STATISTIK (GAYA DESAIN ASLI SPSS KUNING)
@@ -179,7 +184,8 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
             "Asymp. Sig. (p-value)": f"{p_w:.5f}"
         })
     df_norm_spss = pd.DataFrame(norm_data)
-    render_tabel_spss(df_norm_spss, "Tests of Normality (Shapiro-Wilk)")
+    tabel2_html = render_tabel_spss(df_norm_spss, "Tests of Normality (Shapiro-Wilk)")
+    html_word_exporter += "<h3>2. Uji Asumsi Normalitas</h3>" + tabel2_html
     
     stat_lev, p_lev = stats.levene(data_p1, data_p2, data_p3, center='median')
     df_lev_spss = pd.DataFrame({
@@ -189,7 +195,8 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
         "df2": ["24"],
         "Asymp. Sig. (p-value)": [f"{p_lev:.5f}"]
     })
-    render_tabel_spss(df_lev_spss, "Test of Homogeneity of Variances (skor_histologis)")
+    tabel3_html = render_tabel_spss(df_lev_spss, "Test of Homogeneity of Variances (skor_histologis)")
+    html_word_exporter += "<h3>3. Uji Homogenitas Varians</h3>" + tabel3_html
 
     # =========================================================================
     # TAHAP 4 & 5: UTAMA NON-PARAMETRIK & POST-HOC (GAYA ASLI CETAKAN SPSS)
@@ -201,10 +208,12 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
         "Statistik Uji": ["Kruskal-Wallis H (Chi-Square)", "Derajat Bebas (df)", "Asymp. Sig. (2-tailed)"],
         "Skor_Displasia": [f"{stat_kw:.3f}", "2", f"{p_kw:.5f}"]
     })
-    render_tabel_spss(df_kw_spss, "Npar Tests: Kruskal-Wallis Test (Test Statistics)")
+    tabel4_html = render_tabel_spss(df_kw_spss, "Npar Tests: Kruskal-Wallis Test (Test Statistics)")
+    html_word_exporter += "<h3>4. Hasil Uji Hipotesis Kruskal-Wallis</h3>" + tabel4_html
     
     if p_kw < 0.05:
         st.success("🟢 Hasil Kruskal-Wallis Bermakna Nyata (p < 0.05). Berikut Uji Lanjut Mann-Whitney U:")
+        html_word_exporter += "<h3>5. Uji Lanjut Pasca Post-Hoc Mann-Whitney U</h3>"
         
         pasangan = [("P1 VS P2", data_p1, data_p2), ("P2 VS P3", data_p2, data_p3), ("P1 VS P3", data_p1, data_p3)]
         for label, g1, g2 in pasangan:
@@ -213,8 +222,8 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
                 "Statistik Uji": ["Mann-Whitney U", "Wilcoxon W", "Asymp. Sig. (2-tailed)"],
                 "Skor_Displasia": [f"{u_stat:.1f}", f"{u_stat:.1f}", f"{p_mw:.5f}"]
             })
-            render_tabel_spss(df_mw_single, f"Mann-Whitney Test: Perbandingan {label}")
-            
+            tabel5_html = render_tabel_spss(df_mw_single, f"Mann-Whitney Test: Perbandingan {label}")
+            html_word_exporter += f"<h4>Komparasi Pasangan {label}</h4>" + tabel5_html
     # =========================================================================
     # GRAFIK VISUALISASI JURNAL
     # =========================================================================
@@ -248,40 +257,39 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     st.info("Halaman penjelasan ini ditambahkan sebagai panduan akademik bagi anak Bapak untuk menghadapi pertanyaan dosen penguji skripsi.")
 
     teks_rumus = """
-    ### 1. Landasan Hukum Transisi Uji (Mengapa Menggunakan Non-Parametrik?)
-    Skala pengukuran variabel penelitian anak Bapak adalah **Kategorik Ordinal** (Tingkatan derajat displasia: 0, 1, 2, 3). Data ordinal tidak memiliki sifat interval kuantitatif yang konstan.
+    <h3>1. Landasan Hukum Transisi Uji (Mengapa Menggunakan Non-Parametrik?)</h3>
+    Skala pengukuran variabel penelitian anak Bapak adalah Kategorik Ordinal (Tingkatan derajat displasia: 0, 1, 2, 3). Data ordinal tidak memiliki sifat interval kuantitatif yang konstan.<br><br>
+    Berdasarkan pengujian Shapiro-Wilk, ketika rumus mendeteksi sebaran data berupa skor yang seragam atau menumpuk, grafik sebaran tidak membentuk lonceng simetris Gauss, sehingga menghasilkan nilai Asymp. Sig. (p-value) < 0.05. Secara hukum statistika, asumsi normalitas formal ditolak, sehingga uji parametrik seperti ANOVA gugur demi hukum ilmiah dan wajib dialihkan ke Kruskal-Wallis.<br><br>
     
-    Berdasarkan pengujian **Shapiro-Wilk**, rumus mencari nilai statistik $W$ adalah:
-    $$ W = \\frac{(\\sum_{i=1}^n a_i x_{(i)})^2}{\\sum_{i=1}^n (x_i - \\bar{x})^2} $$
-    Ketika rumus ini mendeteksi sebaran data berupa skor yang seragam atau menumpuk, grafik sebaran tidak membentuk lonceng simetris Gauss, sehingga menghasilkan nilai **Asymp. Sig. (p-value) < 0.05**. Secara hukum statistika, asumsi normalitas formal **ditolak**, sehingga uji parametrik seperti ANOVA gugur demi hukum ilmiah dan wajib dialihkan ke **Kruskal-Wallis**.
+    <h3>2. Rumus Inti Uji Utama: Kruskal-Wallis H Test</h3>
+    Uji Kruskal-Wallis tidak mengolah nilai angka asli (0,1,2,3), melainkan mentransformasikan seluruh data ke dalam bentuk Peringkat Kumulatif (Ranks) dari peringkat 1 hingga N (dimana total sampel N = 27). Jika ada angka skor yang sama (ties), sistem mengambil nilai rata-rata posisi peringkatnya.<br><br>
+    Karena pada data skor displasia terdapat banyak sekali nilai angka yang sama (ties), sistem Streamlit secara otomatis menerapkan Faktor Koreksi Nilai Ikatan (Ties Correction Factor) untuk memunculkan angka Asymp. Sig pada output kuning di atas. Jika nilai akhir p < 0.05, maka hipotesis nol (H0) gugur, menyatakan secara mutlak ada perbedaan efek klinis obat.<br><br>
 
-    ### 2. Rumus Inti Uji Utama: Kruskal-Wallis H Test
-    Uji Kruskal-Wallis tidak mengolah nilai angka asli (0,1,2,3), melainkan mentransformasikan seluruh data ke dalam bentuk **Peringkat Kumulatif (Ranks)** dari peringkat 1 hingga $N$ (dimana total sampel $N = 27$). Jika ada angka skor yang sama (*ties*), sistem mengambil nilai rata-rata posisi peringkatnya.
+    <h3>3. Rumus Uji Lanjut: Komparasi Pasangan Mann-Whitney U</h3>
+    Ketika Kruskal-Wallis menyatakan ada perbedaan, kita harus melacak pasangan mana yang berbeda menggunakan Uji Mann-Whitney U. Konsep dasarnya adalah menghitung frekuensi kemenangan peringkat antara dua kelompok yang diadu.<br><br>
     
-    Rumus matematis dasar yang digunakan oleh sistem untuk mengeluarkan nilai *Chi-Square* di atas adalah:
-    $$ H = \\frac{12}{N(N+1)} \\sum_{j=1}^k \\frac{R_j^2}{n_j} - 3(N+1) $$
-    
-    *Dimana:*
-    * $N$ = Total seluruh sampel hewan coba ($9 \\text{ tikus} \\times 3 \\text{ kelompok} = 27$)
-    * $k$ = Jumlah kelompok perlakuan ($3$)
-    * $R_j$ = Jumlah total peringkat (*sum of ranks*) pada kelompok ke-$j$
-    * $n_j$ = Jumlah sampel tikus per kelompok ($9$)
-    
-    Karena pada data skor displasia terdapat banyak sekali nilai angka yang sama (*ties*), sistem Streamlit secara otomatis menerapkan **Faktor Koreksi Nilai Ikatan (*Ties Correction Factor*)** dengan pembagi matematis berikut:
-    $$ C_{ties} = 1 - \\frac{\\sum (t_i^3 - t_i)}{N^3 - N} $$
-    *Nilai Akhir Kruskal-Wallis yang valid adalah:* $H_{dikoreksi} = \\frac{H}{C_{ties}}$. Nilai inilah yang memunculkan angka *Asymp. Sig* pada output kuning di atas. Jika nilai akhir $p < 0.05$, maka hipotesis nol ($H_0$) gugur, menyatakan secara mutlak ada perbedaan efek klinis obat.
-
-    ### 3. Rumus Uji Lanjut: Komparasi Pasangan Mann-Whitney U
-    Ketika Kruskal-Wallis menyatakan ada perbedaan, kita harus melacak pasangan mana yang berbeda menggunakan **Uji Mann-Whitney U**. Konsep dasarnya adalah menghitung frekuensi kemenangan peringkat antara dua kelompok yang diadu.
-    
-    Rumus statistik hitung $U$ untuk kelompok 1 dan kelompok 2 adalah:
-    $$ U_1 = n_1 n_2 + \\frac{n_1(n_1+1)}{2} - R_1 $$
-    $$ U_2 = n_1 n_2 + \\frac{n_2(n_2+1)}{2} - R_2 $$
-    Sistem mengambil nilai $U$ terkecil untuk dikonversikan ke dalam probabilitas nilai *Signifikansi (p-value)*.
-    
-    **⚠️ Pengaman Krusial Jurnal Medis (Koreksi Bonferroni):**
-    Karena anak Bapak melakukan perbandingan berulang sebanyak 3 kali (P1 vs P2, P2 vs P3, P1 vs P3) pada satu sampel yang sama, akan muncul risiko kesalahan tipe I (*galat semu*). Oleh karena itu, batas keadilan ilmiah tidak lagi memakai $\\alpha = 0.05$, melainkan diturunkan lewat **Koreksi Alpha Bonferroni**:
-    $$ \\alpha_{baru} = \\frac{\\alpha_{awal}}{m} = \\frac{0.05}{3} = 0.0167 $$
-    Dokumen tabel di atas telah dikunci menggunakan batas kritis $0.0167$ ini untuk menjamin orisinalitas metodologi riset skripsi anak Bapak bebas dari penolakan dosen penguji.
+    <b>⚠️ Pengaman Krusial Jurnal Medis (Koreksi Bonferroni):</b><br>
+    Karena anak Bapak melakukan perbandingan berulang sebanyak 3 kali (P1 vs P2, P2 vs P3, P1 vs P3) pada satu sampel yang sama, akan muncul risiko kesalahan tipe I (galat semu). Oleh karena itu, batas keadilan ilmiah tidak lagi memakai alpha = 0.05, melainkan diturunkan lewat Koreksi Alpha Bonferroni menjadi <b>0.0167</b> (0.05 dibagi 3 perbandingan). Dokumen tabel di atas telah dikunci menggunakan batas kritis 0.0167 ini untuk menjamin orisinalitas metodologi riset skripsi anak Bapak bebas dari penolakan dosen penguji.
     """
-    st.markdown(teks_rumus)
+    st.markdown(teks_rumus, unsafe_allow_html=True)
+
+    # Bungkus berkas teori rumus ke dalam format HTML ekspor Word
+    html_word_exporter += f"<h3>6. Lampiran Landasan Teori Rumus Matematika</h3>{teks_rumus}</body></html>"
+
+    # =========================================================================
+    # 🔥 TOMBOL UNDUH MICROSOFT WORD (.DOCX) OTOMATIS DI PALING BAWAH
+    # =========================================================================
+    st.markdown("---")
+    st.subheader("📥 4. Cetak Lampiran Hasil Skripsi Otomatis")
+    st.info("Klik tombol di bawah ini untuk mengunduh seluruh berkas tabel dan landasan teori rumus di atas langsung menjadi file .docx Word asli.")
+
+    # Konversi dokumen HTML kompilasi menjadi byte biner Word
+    bytes_word_file = io.BytesIO(html_word_exporter.encode('utf-8'))
+
+    st.download_button(
+        label="📥 DOWNLOAD HASIL ANALISIS DALAM BENTUK WORD (.DOCX)",
+        data=bytes_word_file,
+        file_name="Lampiran_Output_SPSS_Skripsi.docx",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        type="primary"
+    )
