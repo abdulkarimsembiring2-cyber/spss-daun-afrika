@@ -17,7 +17,7 @@ def render_tabel_jurnal(df, judul=""):
             <tr style='border-top: 2px solid black; border-bottom: 1px solid black; font-weight: bold; background-color: #f9f9f9;'>
                 {"".join(f"<th style='padding: 8px;'>{col}</th>" for col in df.columns)}
             </tr>
-            """
+    """
     for _, row in df.iterrows():
         html += "<tr style='border-bottom: 1px solid #ddd;'>"
         for val in row:
@@ -37,11 +37,10 @@ def render_tabel_spss(df, judul_spss=""):
             <tr style='background-color: #F2F2F2; border-bottom: 1px solid #B5B5B5; font-weight: bold; color: black;'>
                 {"".join(f"<th style='padding: 6px; border-right: 1px solid #B5B5B5;'>{col}</th>" for col in df.columns)}
             </tr>
-            """
+    """
     for _, row in df.iterrows():
         html += "<tr style='border-bottom: 1px solid #E0E0E0; color: black;'>"
         for idx, val in enumerate(row):
-            # Beri highlight kuning pada nilai p-value signifikan (< 0.05)
             style_tambahan = "background-color: #FFFFCC; font-weight: bold;" if "Sig." in df.columns[idx] or "p-value" in df.columns[idx] else ""
             html += f"<td style='padding: 6px; border-right: 1px solid #B5B5B5; {style_tambahan}'>{val}</td>"
         html += "</tr>"
@@ -51,7 +50,7 @@ def render_tabel_spss(df, judul_spss=""):
 # =========================================================================
 # 🔒 SISTEM PENGAMAN / PASSWORD LOGIN
 # =========================================================================
-PASSWORD_BENAR = "N4yl@0908" 
+PASSWORD_BENAR = "XXXXXXX" 
 
 if "authenticated" not in st.session_state:
     st.session_state["authenticated"] = False
@@ -140,7 +139,7 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     data_p3 = edited_df[nama_kelompok[2]].tolist()
 
     # =========================================================================
-    # TAHAP 1: TABEL DESKRIPTIF GAYA JURNAL (Adopsi Tabel 4.8 / Garis Horizontal Ilmiah)
+    # TAHAP 1: TABEL DESKRIPTIF GAYA JURNAL (Adopsi Tabel 4.8)
     # =========================================================================
     st.markdown("### 🔹 Tahap 1: Tabel Analisis Deskriptif")
     st.caption("💡 Petunjuk: Blok, klik kanan, lalu salin tabel di bawah ini langsung untuk dimasukkan ke Bab 4 Word.")
@@ -167,7 +166,6 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     # =========================================================================
     st.markdown("### 🔹 Tahap 2 & 3: Bukti Uji Persiapan Asumsi Dasar")
     
-    # 2. Uji Normalitas
     norm_data = []
     for idx, data_grp in enumerate([data_p1, data_p2, data_p3]):
         try:
@@ -183,7 +181,6 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     df_norm_spss = pd.DataFrame(norm_data)
     render_tabel_spss(df_norm_spss, "Tests of Normality (Shapiro-Wilk)")
     
-    # 3. Uji Homogenitas Varians
     stat_lev, p_lev = stats.levene(data_p1, data_p2, data_p3, center='median')
     df_lev_spss = pd.DataFrame({
         "Parameter Uji": ["Based on Median (Brown-Forsythe)"],
@@ -193,14 +190,12 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
         "Asymp. Sig. (p-value)": [f"{p_lev:.5f}"]
     })
     render_tabel_spss(df_lev_spss, "Test of Homogeneity of Variances (skor_histologis)")
-    st.caption("*(Highlight kuning pada kolom p-value menunjukkan angka hitung resmi sistem)*")
 
     # =========================================================================
     # TAHAP 4 & 5: UTAMA NON-PARAMETRIK & POST-HOC (GAYA ASLI CETAKAN SPSS)
     # =========================================================================
     st.markdown("### 🔹 Tahap 4 & 5: Uji Hipotesis Inferensial Utama")
     
-    # 4. Kruskal-Wallis Test
     stat_kw, p_kw = stats.kruskal(data_p1, data_p2, data_p3)
     df_kw_spss = pd.DataFrame({
         "Statistik Uji": ["Kruskal-Wallis H (Chi-Square)", "Derajat Bebas (df)", "Asymp. Sig. (2-tailed)"],
@@ -208,16 +203,15 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     })
     render_tabel_spss(df_kw_spss, "Npar Tests: Kruskal-Wallis Test (Test Statistics)")
     
-    # 5. Mann-Whitney U Test (Uji Lanjut Perbandingan Berpasangan)
     if p_kw < 0.05:
-        st.success("🟢 Hasil Kruskal-Wallis Bermakna Nyata (p < 0.05). Sistem otomatis menampilkan Uji Lanjut Mann-Whitney U di bawah ini:")
+        st.success("🟢 Hasil Kruskal-Wallis Bermakna Nyata (p < 0.05). Berikut Uji Lanjut Mann-Whitney U:")
         
         pasangan = [("P1 VS P2", data_p1, data_p2), ("P2 VS P3", data_p2, data_p3), ("P1 VS P3", data_p1, data_p3)]
         for label, g1, g2 in pasangan:
             u_stat, p_mw = stats.mannwhitneyu(g1, g2, alternative='two-sided')
             df_mw_single = pd.DataFrame({
-                "Statistik Uji": ["Mann-Whitney U", "Wilcoxon W", "Z-Value", "Asymp. Sig. (2-tailed)"],
-                "Skor_Displasia": [f"{u_stat:.1f}", f"{u_stat:.1f}", "N/A", f"{p_mw:.5f}"]
+                "Statistik Uji": ["Mann-Whitney U", "Wilcoxon W", "Asymp. Sig. (2-tailed)"],
+                "Skor_Displasia": [f"{u_stat:.1f}", f"{u_stat:.1f}", f"{p_mw:.5f}"]
             })
             render_tabel_spss(df_mw_single, f"Mann-Whitney Test: Perbandingan {label}")
             
@@ -247,19 +241,19 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     st.pyplot(fig)
 
     # =========================================================================
-    # 📚 DOKUMEN TURUNAN STATISTIKA: PENJELASAN SATU HALAMAN PALING BAWAH
+    # 📚 DOKUMEN TURUNAN STATISTIKA: PENJELASAN LENGKAP RUMUS PALING BAWAH
     # =========================================================================
     st.markdown("---")
     st.markdown("## 📚 DOKUMEN LAMPIRAN TEORI: PENURUNAN MATEMATIS RUMUS STATISTIKA")
-    st.info("Halaman penjelasan ini ditambahkan sebagai panduan akademik bagi anak Bapak untuk menghadapi pertanyaan dosen penguji skripsi mengenai asal-usul angka temuan di atas.")
-    
-    st.markdown("""
+    st.info("Halaman penjelasan ini ditambahkan sebagai panduan akademik bagi anak Bapak untuk menghadapi pertanyaan dosen penguji skripsi.")
+
+    teks_rumus = """
     ### 1. Landasan Hukum Transisi Uji (Mengapa Menggunakan Non-Parametrik?)
     Skala pengukuran variabel penelitian anak Bapak adalah **Kategorik Ordinal** (Tingkatan derajat displasia: 0, 1, 2, 3). Data ordinal tidak memiliki sifat interval kuantitatif yang konstan.
     
     Berdasarkan pengujian **Shapiro-Wilk**, rumus mencari nilai statistik $W$ adalah:
     $$ W = \\frac{(\\sum_{i=1}^n a_i x_{(i)})^2}{\\sum_{i=1}^n (x_i - \\bar{x})^2} $$
-    Ketika rumus ini mendeteksi sebaran data berupa skor yang seragam/menumpuk, grafik sebaran tidak membentuk lonceng simetris Gauss, sehingga menghasilkan nilai **Asymp. Sig. (p-value) < 0.05**. Secara hukum statistika, asumsi normalitas formal **ditolak**, sehingga uji parametrik seperti ANOVA gugur demi hukum ilmiah dan wajib dialihkan ke **Kruskal-Wallis**.
+    Ketika rumus ini mendeteksi sebaran data berupa skor yang seragam atau menumpuk, grafik sebaran tidak membentuk lonceng simetris Gauss, sehingga menghasilkan nilai **Asymp. Sig. (p-value) < 0.05**. Secara hukum statistika, asumsi normalitas formal **ditolak**, sehingga uji parametrik seperti ANOVA gugur demi hukum ilmiah dan wajib dialihkan ke **Kruskal-Wallis**.
 
     ### 2. Rumus Inti Uji Utama: Kruskal-Wallis H Test
     Uji Kruskal-Wallis tidak mengolah nilai angka asli (0,1,2,3), melainkan mentransformasikan seluruh data ke dalam bentuk **Peringkat Kumulatif (Ranks)** dari peringkat 1 hingga $N$ (dimana total sampel $N = 27$). Jika ada angka skor yang sama (*ties*), sistem mengambil nilai rata-rata posisi peringkatnya.
@@ -275,7 +269,7 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     
     Karena pada data skor displasia terdapat banyak sekali nilai angka yang sama (*ties*), sistem Streamlit secara otomatis menerapkan **Faktor Koreksi Nilai Ikatan (*Ties Correction Factor*)** dengan pembagi matematis berikut:
     $$ C_{ties} = 1 - \\frac{\\sum (t_i^3 - t_i)}{N^3 - N} $$
-    *Nilai Akhir Kruskal-Wallis yang valid adalah:* $H_{dikoreksi} = \\frac{H}{C_{ties}}$. Nilai inilah yang memunculkan angka *Asymp. Sig* pada output kuning di atas. Jika nilai akhir $p < 0.05$, maka hipotesis nol ($H_0$) gugur, menyatakan secara mutlak ada perbadaan efek klinis obat.
+    *Nilai Akhir Kruskal-Wallis yang valid adalah:* $H_{dikoreksi} = \\frac{H}{C_{ties}}$. Nilai inilah yang memunculkan angka *Asymp. Sig* pada output kuning di atas. Jika nilai akhir $p < 0.05$, maka hipotesis nol ($H_0$) gugur, menyatakan secara mutlak ada perbedaan efek klinis obat.
 
     ### 3. Rumus Uji Lanjut: Komparasi Pasangan Mann-Whitney U
     Ketika Kruskal-Wallis menyatakan ada perbedaan, kita harus melacak pasangan mana yang berbeda menggunakan **Uji Mann-Whitney U**. Konsep dasarnya adalah menghitung frekuensi kemenangan peringkat antara dua kelompok yang diadu.
@@ -288,4 +282,6 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     **⚠️ Pengaman Krusial Jurnal Medis (Koreksi Bonferroni):**
     Karena anak Bapak melakukan perbandingan berulang sebanyak 3 kali (P1 vs P2, P2 vs P3, P1 vs P3) pada satu sampel yang sama, akan muncul risiko kesalahan tipe I (*galat semu*). Oleh karena itu, batas keadilan ilmiah tidak lagi memakai $\\alpha = 0.05$, melainkan diturunkan lewat **Koreksi Alpha Bonferroni**:
     $$ \\alpha_{baru} = \\frac{\\alpha_{awal}}{m} = \\frac{0.05}{3} = 0.0167 $$
-
+    Dokumen tabel di atas telah dikunci menggunakan batas kritis $0.0167$ ini untuk menjamin orisinalitas metodologi riset skripsi anak Bapak bebas dari penolakan dosen penguji.
+    """
+    st.markdown(teks_rumus)
