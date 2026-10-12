@@ -19,7 +19,7 @@ def render_tabel_jurnal(df, judul=""):
             </tr>
     """
     for _, row in df.iterrows():
-        html += "<tr style='border-bottom: 1px solid #ddd;'> layout='wide'"
+        html += "<tr style='border-bottom: 1px solid #ddd;'>"
         for val in row:
             html += f"<td style='padding: 8px;'>{val}</td>"
         html += "</tr>"
@@ -69,7 +69,6 @@ if not st.session_state["authenticated"]:
             st.error("Password salah! Akses ditolak.")
     st.stop()
 # =========================================================================
-
 st.title("🔬 Aplikasi Asisten Statistik Skripsi Kedokteran Gigi")
 st.write("Sistem Analisis Eksperimen In-Vivo (Skor Displasia Histopatologi)")
 st.markdown("---")
@@ -92,7 +91,7 @@ st.header("💾 Riwayat Data (Impor / Ekspor)")
 uploaded_file = st.file_uploader("Punya simpanan berkas Excel dari progres minggu lalu? Unggah di sini:", type=["xlsx"])
 
 index_tikus = [f"Tikus {i+1}" for i in range(9)]
-matrix_data = {g_name: * 9 for g_name in nama_kelompok}
+matrix_data = {g_name: [0] * 9 for g_name in nama_kelompok}
 df_input = pd.DataFrame(matrix_data, index=index_tikus)
 
 if uploaded_file is not None:
@@ -136,7 +135,6 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
 
     st.header("📈 3. Dokumen Output Hasil Statistik & Grafik (Siap Salin ke Word)")
     
-    # Inisialisasi string pengumpul HTML untuk diekspor ke Word paling bawah
     html_word_exporter = "<html><head><meta charset='utf-8'></head><body><h2 style='font-family:sans-serif;'>LAPORAN OUTPUT ANALISIS STATISTIK SKRIPSI</h2>"
 
     data_p1 = edited_df[nama_kelompok[0]].tolist()
@@ -144,10 +142,9 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     data_p3 = edited_df[nama_kelompok[2]].tolist()
 
     # =========================================================================
-    # TAHAP 1: TABEL DESKRIPTIF GAYA JURNAL (Adopsi Tabel 4.8)
+    # TAHAP 1: TABEL DESKRIPTIF GAYA JURNAL
     # =========================================================================
     st.markdown("### 🔹 Tahap 1: Tabel Analisis Deskriptif")
-    
     skor_labels = {0: "Normal (Skor 0)", 1: "Ringan (Skor 1)", 2: "Sedang (Skor 2)", 3: "Berat (Skor 3)"}
     rows_deskriptif = []
     
@@ -224,6 +221,7 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
             })
             tabel5_html = render_tabel_spss(df_mw_single, f"Mann-Whitney Test: Perbandingan {label}")
             html_word_exporter += f"<h4>Komparasi Pasangan {label}</h4>" + tabel5_html
+
     # =========================================================================
     # GRAFIK VISUALISASI JURNAL
     # =========================================================================
@@ -254,8 +252,7 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     # =========================================================================
     st.markdown("---")
     st.markdown("## 📚 DOKUMEN LAMPIRAN TEORI: PENURUNAN MATEMATIS RUMUS STATISTIKA")
-    st.info("Halaman penjelasan ini ditambahkan sebagai panduan akademik bagi anak Bapak untuk menghadapi pertanyaan dosen penguji skripsi.")
-
+    
     teks_rumus = """
     <h3>1. Landasan Hukum Transisi Uji (Mengapa Menggunakan Non-Parametrik?)</h3>
     Skala pengukuran variabel penelitian anak Bapak adalah Kategorik Ordinal (Tingkatan derajat displasia: 0, 1, 2, 3). Data ordinal tidak memiliki sifat interval kuantitatif yang konstan.<br><br>
@@ -269,11 +266,9 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     Ketika Kruskal-Wallis menyatakan ada perbedaan, kita harus melacak pasangan mana yang berbeda menggunakan Uji Mann-Whitney U. Konsep dasarnya adalah menghitung frekuensi kemenangan peringkat antara dua kelompok yang diadu.<br><br>
     
     <b>⚠️ Pengaman Krusial Jurnal Medis (Koreksi Bonferroni):</b><br>
-    Karena anak Bapak melakukan perbandingan berulang sebanyak 3 kali (P1 vs P2, P2 vs P3, P1 vs P3) pada satu sampel yang sama, akan muncul risiko kesalahan tipe I (galat semu). Oleh karena itu, batas keadilan ilmiah tidak lagi memakai alpha = 0.05, melainkan diturunkan lewat Koreksi Alpha Bonferroni menjadi <b>0.0167</b> (0.05 dibagi 3 perbandingan). Dokumen tabel di atas telah dikunci menggunakan batas kritis 0.0167 ini untuk menjamin orisinalitas metodologi riset skripsi anak Bapak bebas dari penolakan dosen penguji.
+    Karena anak Bapak melakukan perbandingan berulang sebanyak 3 kali (P1 vs P2, P2 vs P3, P1 vs P3) pada satu sampel yang sama, akan muncul risiko kesalahan tipe I (galat semu). Oleh karena itu, batas keadilan ilmiah tidak lagi memakai alpha = 0.05, melainkan diturunkan lewat Koreksi Alpha Bonferroni menjadi 0.0167 (0.05 dibagi 3 perbandingan). Dokumen tabel di atas telah dikunci menggunakan batas kritis 0.0167 ini untuk menjamin orisinalitas metodologi riset skripsi anak Bapak bebas dari penolakan dosen penguji.
     """
     st.markdown(teks_rumus, unsafe_allow_html=True)
-
-    # Bungkus berkas teori rumus ke dalam format HTML ekspor Word
     html_word_exporter += f"<h3>6. Lampiran Landasan Teori Rumus Matematika</h3>{teks_rumus}</body></html>"
 
     # =========================================================================
@@ -281,11 +276,8 @@ if st.button("🚀 Jalankan Analisis Statistik Lengkap (Standar SPSS)", type="pr
     # =========================================================================
     st.markdown("---")
     st.subheader("📥 4. Cetak Lampiran Hasil Skripsi Otomatis")
-    st.info("Klik tombol di bawah ini untuk mengunduh seluruh berkas tabel dan landasan teori rumus di atas langsung menjadi file .docx Word asli.")
-
-    # Konversi dokumen HTML kompilasi menjadi byte biner Word
+    
     bytes_word_file = io.BytesIO(html_word_exporter.encode('utf-8'))
-
     st.download_button(
         label="📥 DOWNLOAD HASIL ANALISIS DALAM BENTUK WORD (.DOCX)",
         data=bytes_word_file,
